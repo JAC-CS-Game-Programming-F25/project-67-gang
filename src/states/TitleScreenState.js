@@ -1,14 +1,16 @@
 import State from "../../lib/State.js";
 import GameStateName from "../enums/GameStateName.js";
 import Input from "../../lib/Input.js";
-import { CANVAS_HEIGHT, CANVAS_WIDTH, context, stateMachine, input, getHighScore } from "../globals.js";
-
+import { CANVAS_HEIGHT, CANVAS_WIDTH, context, stateMachine, input, getHighScore, sounds } from "../globals.js";
 export default class TitleScreenState extends State {
 	constructor() {
 		super();
 	}
 	enter() {
 		this.highScore = getHighScore();
+			if (sounds.get('music')) {
+				sounds.stop('music');
+			}
 	}
 
 	update(dt) {

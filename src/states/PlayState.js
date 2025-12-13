@@ -1,5 +1,5 @@
 import State from "../../lib/State.js";
-import { context, CANVAS_WIDTH, CANVAS_HEIGHT, input, stateMachine, stats } from "../globals.js";
+import { context, CANVAS_WIDTH, CANVAS_HEIGHT, input, stateMachine, stats, sounds } from "../globals.js";
 import Input from "../../lib/Input.js";
 import Player from "../entities/Player.js";
 import Bullet from "../objects/Bullet.js";
@@ -33,6 +33,10 @@ export default class PlayState extends State {
 		
 		// Spawn wave
 		this.spawnWave();
+			if (!sounds.get('music').pool[0].paused) {
+			sounds.stop('music');
+		}
+		sounds.play('music');
 		
 		console.log(`Wave ${this.currentWave} started!`);
 	}
@@ -55,7 +59,7 @@ export default class PlayState extends State {
 				this.bullets.push(bullet);
 
 				this.particles.createMuzzleFlash(center.x, center.y, this.player.aimAngle);
-
+				sounds.play('shoot');
 			}
 		}
 
@@ -121,7 +125,8 @@ export default class PlayState extends State {
 						if (Math.random() < 0.2) {
 							this.healthPacks.push(new HealthPack(coinData.x - 10, coinData.y - 10));
 						}
-						
+						sounds.play('death');
+
 						// Explosion effect
 						this.particles.createExplosion(
 							coinData.x, 

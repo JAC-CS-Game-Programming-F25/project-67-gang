@@ -10,5 +10,27 @@
 			"path": "https://fonts.googleapis.com/css2?family=Roboto&display=swap"
 		}
 	],
-	"sounds": []
+	"sounds": [
+		{
+			"name": "shoot",
+			"path": "./assets/sounds/shoot.wav",
+			"volume": 0.2,
+			"loop": false,
+			"size": 15
+		},
+		{
+			"name": "death",
+			"path": "./assets/sounds/death.wav",
+			"volume": 0.4,
+			"loop": false,
+			"size": 3
+		},
+		{
+			"name": "music",
+			"path": "./assets/sounds/music.wav",
+			"volume": 0.15,
+			"loop": true,
+			"size": 1
+		}
+	]
 }
