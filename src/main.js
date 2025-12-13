@@ -27,6 +27,7 @@ import ShopState from './states/ShopState.js';
 import GameOverState from './states/GameOverState.js';
 import VictoryState from './states/VictoryState.js';
 import TitleScreenState from './states/TitleScreenState.js';
+import PauseState from './states/PauseState.js';
 
 // Set the dimensions of the play area.
 canvas.width = CANVAS_WIDTH;
@@ -50,6 +51,7 @@ sounds.load(soundDefinitions);
 // Add all the states to the state machine.
 stateMachine.add(GameStateName.TitleScreen, new TitleScreenState());
 stateMachine.add(GameStateName.Play, new PlayState());
+stateMachine.add(GameStateName.Pause, new PauseState());
 stateMachine.add(GameStateName.Shop, new ShopState());
 stateMachine.add(GameStateName.GameOver, new GameOverState());
 stateMachine.add(GameStateName.Victory, new VictoryState());

@@ -1,5 +1,5 @@
 import State from "../../lib/State.js";
-import { context, CANVAS_WIDTH, CANVAS_HEIGHT, input, stateMachine, stats, sounds } from "../globals.js";
+import { context, CANVAS_WIDTH, CANVAS_HEIGHT, input, stateMachine, stats, sounds, saveGameState, deleteSaveGame } from "../globals.js";
 import Input from "../../lib/Input.js";
 import Player from "../entities/Player.js";
 import Bullet from "../objects/Bullet.js";
@@ -15,14 +15,50 @@ export default class PlayState extends State {
 	}
 
 	enter(params = {}) {
-		// If coming from shop, keep the same player
-		if (params.player) {
+			if (params.player && params.bullets) {
+				this.player = params.player;
+				this.currentWave = params.currentWave;
+				this.bullets = params.bullets;
+				this.enemies = params.enemies;
+				this.coins = params.coins;
+				this.healthPacks = params.healthPacks;
+				this.particles = new ParticleSystem();
+				
+				console.log('Resumed from pause');
+				return; // Skip rest of enter logic
+			}
+		// Check if loading from save game
+		if (params.loadGame) {
+			const saveData = params.loadGame;
+			
+			// Restore player with saved data
+			this.player = new Player(saveData.player.x, saveData.player.y);
+			this.player.health = saveData.player.health;
+			this.player.maxHealth = saveData.player.maxHealth;
+			
+			// Restore stats
+			stats.coins = saveData.stats.coins;
+			stats.kills = saveData.stats.kills;
+			stats.healthUpgrades = saveData.stats.healthUpgrades;
+			stats.damageUpgrades = saveData.stats.damageUpgrades;
+			
+			// Restore wave
+			this.currentWave = saveData.currentWave;
+			
+			console.log(`Loaded save game - Wave ${this.currentWave}`);
+		}
+		// Coming from shop, keep the same player
+		else if (params.player) {
 			this.player = params.player;
 			this.currentWave = params.nextWave;
-		} else {
-			// New game - create new player
+		} 
+		// New game - create new player
+		else {
 			this.player = new Player(CANVAS_WIDTH / 2 - 20, CANVAS_HEIGHT / 2 - 20);
 			this.currentWave = 1;
+			
+			// Delete old save when starting new game
+			deleteSaveGame();
 		}
 		
 		this.bullets = [];
@@ -33,7 +69,9 @@ export default class PlayState extends State {
 		
 		// Spawn wave
 		this.spawnWave();
-			if (!sounds.get('music').pool[0].paused) {
+		
+		// Start background music
+		if (!sounds.get('music').pool[0].paused) {
 			sounds.stop('music');
 		}
 		sounds.play('music');
@@ -48,6 +86,20 @@ export default class PlayState extends State {
 	}
 
 	update(dt) {
+		// Check for pause (P key)
+		if (input.isKeyPressed(Input.KEYS.P)) {
+			stateMachine.change(GameStateName.Pause, {
+				playStateData: {
+					player: this.player,
+					currentWave: this.currentWave,
+					bullets: this.bullets,
+					enemies: this.enemies,
+					coins: this.coins,
+					healthPacks: this.healthPacks
+				}
+			});
+			return; // Stop updating when paused
+		}
 		// Update player
 		this.player.update(dt);
 
@@ -103,6 +155,7 @@ export default class PlayState extends State {
 
 		// Check if player is dead
 		if (this.player.isDead) {
+			deleteSaveGame();
 			stateMachine.change(GameStateName.GameOver);
 		}
 	}
@@ -173,8 +226,10 @@ export default class PlayState extends State {
 		sounds.play('waveComplete');
 		if (this.currentWave >= 5) {
 			// Victory!
+			deleteSaveGame();
 			stateMachine.change(GameStateName.Victory);
 		} else {
+			saveGameState(this.player, this.currentWave + 1);
 			// Next wave - pass player to shop
 			stateMachine.change(GameStateName.Shop, { 
 				nextWave: this.currentWave + 1,

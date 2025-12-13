@@ -85,3 +85,42 @@ export function getHighScore() {
 	}
 	return { wave: 0, kills: 0, coins: 0 };
 }
+// Full game state save/load
+export function saveGameState(player, currentWave) {
+	const gameState = {
+		player: {
+			x: player.position.x,
+			y: player.position.y,
+			health: player.health,
+			maxHealth: player.maxHealth
+		},
+		currentWave: currentWave,
+		stats: {
+			coins: stats.coins,
+			kills: stats.kills,
+			healthUpgrades: stats.healthUpgrades,
+			damageUpgrades: stats.damageUpgrades
+		},
+		timestamp: Date.now()
+	};
+	
+	localStorage.setItem('neonOnslaughtSaveGame', JSON.stringify(gameState));
+	console.log('Game saved!');
+}
+
+export function loadGameState() {
+	const saved = localStorage.getItem('neonOnslaughtSaveGame');
+	if (saved) {
+		return JSON.parse(saved);
+	}
+	return null;
+}
+
+export function deleteSaveGame() {
+	localStorage.removeItem('neonOnslaughtSaveGame');
+	console.log('Save game deleted');
+}
+
+export function hasSaveGame() {
+	return localStorage.getItem('neonOnslaughtSaveGame') !== null;
+}
