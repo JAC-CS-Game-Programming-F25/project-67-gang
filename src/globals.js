@@ -9,23 +9,21 @@ export const canvas = document.createElement('canvas');
 export const context =
 	canvas.getContext('2d') || new CanvasRenderingContext2D();
 
-// Replace these values according to how big you want your canvas.
-export const CANVAS_WIDTH = 0;
-export const CANVAS_HEIGHT = 0;
+// Game dimensions
+export const CANVAS_WIDTH = 1280;
+export const CANVAS_HEIGHT = 720;
 
 const resizeCanvas = () => {
 	const scaleX = window.innerWidth / CANVAS_WIDTH;
 	const scaleY = window.innerHeight / CANVAS_HEIGHT;
-	const scale = Math.min(scaleX, scaleY); // Maintain aspect ratio
+	const scale = Math.min(scaleX, scaleY);
 
 	canvas.style.width = `${CANVAS_WIDTH * scale}px`;
 	canvas.style.height = `${CANVAS_HEIGHT * scale}px`;
 };
 
-// Listen for canvas resize events
 window.addEventListener('resize', resizeCanvas);
-
-resizeCanvas(); // Call once to scale initially
+resizeCanvas();
 
 export const keys = {};
 export const images = new Images(context);
@@ -34,3 +32,56 @@ export const stateMachine = new StateMachine();
 export const timer = new Timer();
 export const input = new Input(canvas);
 export const sounds = new Sounds();
+
+// Game-specific constants
+export const PLAYER_SPEED = 200;
+export const PLAYER_MAX_HEALTH = 100;
+export const BULLET_SPEED = 400;
+export const BULLET_DAMAGE = 10;
+
+// Global game stats
+export const stats = {
+	coins: 0,
+	wave: 1,
+	kills: 0,
+	healthUpgrades: 0,
+	damageUpgrades: 0
+};
+
+export function resetStats() {
+	stats.coins = 0;
+	stats.wave = 1;
+	stats.kills = 0;
+}
+
+export function addCoins(amount) {
+	stats.coins += amount;
+}
+
+export function spendCoins(amount) {
+	if (stats.coins >= amount) {
+		stats.coins -= amount;
+		return true;
+	}
+	return false;
+}
+// localStorage for high scores
+export function saveHighScore(wave, kills, coins) {
+	const currentBest = getHighScore();
+	
+	if (wave > currentBest.wave || 
+	    (wave === currentBest.wave && kills > currentBest.kills)) {
+		const highScore = { wave, kills, coins };
+		localStorage.setItem('neonOnslaughtHighScore', JSON.stringify(highScore));
+		return true; // New high score!
+	}
+	return false;
+}
+
+export function getHighScore() {
+	const saved = localStorage.getItem('neonOnslaughtHighScore');
+	if (saved) {
+		return JSON.parse(saved);
+	}
+	return { wave: 0, kills: 0, coins: 0 };
+}

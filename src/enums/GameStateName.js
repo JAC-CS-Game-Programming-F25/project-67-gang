@@ -1,8 +1,9 @@
 const GameStateName = {
-	GameOver: 'game-over',
-	Play: 'play',
-	Victory: 'victory',
 	TitleScreen: 'title-screen',
+	Play: 'play',
+	Shop: 'shop',
+	GameOver: 'game-over',
+	Victory: 'victory',
 };
 
 export default GameStateName;

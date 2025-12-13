@@ -1,11 +1,14 @@
 {
-	"images": [
-
-	],
+	"images": [],
 	"fonts": [
-
+		{
+			"name": "Orbitron",
+			"path": "https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap"
+		},
+		{
+			"name": "Roboto",
+			"path": "https://fonts.googleapis.com/css2?family=Roboto&display=swap"
+		}
 	],
-	"sounds": [
-		
-	]
+	"sounds": []
 }

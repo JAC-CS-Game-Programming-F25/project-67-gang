@@ -1,11 +1,12 @@
 /**
- * Game Name
+ * Neon Onslaught
  *
- * Authors
+ * Omar & Ariyaman
  *
- * Brief description
+ * A fast-paced wave-based shooter. Survive 5 waves of enemies!
  *
- * Asset sources
+ * Assets:
+ * - Fonts: Orbitron & Roboto from Google Fonts
  */
 
 import GameStateName from './enums/GameStateName.js';
@@ -22,6 +23,7 @@ import {
 	stateMachine,
 } from './globals.js';
 import PlayState from './states/PlayState.js';
+import ShopState from './states/ShopState.js';
 import GameOverState from './states/GameOverState.js';
 import VictoryState from './states/VictoryState.js';
 import TitleScreenState from './states/TitleScreenState.js';
@@ -29,9 +31,8 @@ import TitleScreenState from './states/TitleScreenState.js';
 // Set the dimensions of the play area.
 canvas.width = CANVAS_WIDTH;
 canvas.height = CANVAS_HEIGHT;
-canvas.setAttribute('tabindex', '1'); // Allows the canvas to receive user input.
+canvas.setAttribute('tabindex', '1');
 
-// Now that the canvas element has been prepared, we can add it to the DOM.
 document.body.appendChild(canvas);
 
 // Fetch the asset definitions from config.json.
@@ -48,11 +49,12 @@ sounds.load(soundDefinitions);
 
 // Add all the states to the state machine.
 stateMachine.add(GameStateName.TitleScreen, new TitleScreenState());
+stateMachine.add(GameStateName.Play, new PlayState());
+stateMachine.add(GameStateName.Shop, new ShopState());
 stateMachine.add(GameStateName.GameOver, new GameOverState());
 stateMachine.add(GameStateName.Victory, new VictoryState());
-stateMachine.add(GameStateName.Play, new PlayState());
 
-stateMachine.change(GameStateName.Play);
+stateMachine.change(GameStateName.TitleScreen);
 
 const game = new Game(
 	stateMachine,
@@ -64,5 +66,4 @@ const game = new Game(
 
 game.start();
 
-// Focus the canvas so that the player doesn't have to click on it.
 canvas.focus();
