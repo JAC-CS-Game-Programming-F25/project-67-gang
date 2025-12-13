@@ -1,7 +1,7 @@
 import State from "../../lib/State.js";
 import GameStateName from "../enums/GameStateName.js";
 import Input from "../../lib/Input.js";
-import { CANVAS_HEIGHT, CANVAS_WIDTH, context, stateMachine, input, stats, saveHighScore, getHighScore } from "../globals.js";
+import { CANVAS_HEIGHT, CANVAS_WIDTH, context, stateMachine, input, stats, saveHighScore, getHighScore, sounds } from "../globals.js";
 export default class GameOverState extends State {
 	constructor() {
 		super();
@@ -11,6 +11,9 @@ export default class GameOverState extends State {
 		// Save high score
 		this.isNewHighScore = saveHighScore(stats.wave, stats.kills, stats.coins);
 		this.highScore = getHighScore();
+		
+		sounds.play('gameOver');
+
 	}
 
 	update(dt) {

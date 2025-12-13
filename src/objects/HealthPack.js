@@ -1,5 +1,5 @@
 import GameObject from "./GameObject.js";
-import { context } from "../globals.js";
+import { context, sounds } from "../globals.js";
 
 export default class HealthPack extends GameObject {
 	constructor(x, y) {
@@ -22,6 +22,7 @@ export default class HealthPack extends GameObject {
 
 	collect(player) {
 		player.heal(this.healAmount);
+		sounds.play('health');
 		this.cleanUp = true;
 	}
 

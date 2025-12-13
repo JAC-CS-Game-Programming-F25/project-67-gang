@@ -1,7 +1,7 @@
 import State from "../../lib/State.js";
 import GameStateName from "../enums/GameStateName.js";
 import Input from "../../lib/Input.js";
-import { CANVAS_HEIGHT, CANVAS_WIDTH, context, stateMachine, input, stats, saveHighScore, getHighScore } from "../globals.js";
+import { CANVAS_HEIGHT, CANVAS_WIDTH, context, stateMachine, input, stats, saveHighScore, getHighScore, sounds } from "../globals.js";
 export default class VictoryState extends State {
 	constructor() {
 		super();
@@ -11,6 +11,8 @@ export default class VictoryState extends State {
 		// Always save on victory (beat wave 5)
 		saveHighScore(5, stats.kills, stats.coins);
 		this.highScore = getHighScore();
+
+		sounds.play('win');
 	}
 
 	update(dt) {

@@ -1,5 +1,5 @@
 import GameObject from "./GameObject.js";
-import { context, addCoins } from "../globals.js";
+import { context, addCoins, sounds } from "../globals.js";
 
 export default class Coin extends GameObject {
 	constructor(x, y, value = 5) {
@@ -33,6 +33,7 @@ export default class Coin extends GameObject {
 
 	collect() {
 		addCoins(this.value);
+		sounds.play('coin');
 		this.cleanUp = true;
 	}
 

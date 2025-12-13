@@ -119,12 +119,18 @@ export default class PlayState extends State {
 					// Drop coin and explode if enemy just died
 					if (enemy.isDead && !wasDead) {
 						const coinData = enemy.dropCoin();
-						this.coins.push(new Coin(coinData.x - 8, coinData.y - 8, coinData.value));
 						
-						// 20% chance to drop health pack 
-						if (Math.random() < 0.2) {
+						// Random drop: 25% health pack, 50% coin, 25% nothing
+						const dropRoll = Math.random();
+						if (dropRoll < 0.25) {
+							// 25% chance: Health pack
 							this.healthPacks.push(new HealthPack(coinData.x - 10, coinData.y - 10));
+						} else if (dropRoll < 0.75) {
+							// 50% chance: Coin (0.25 to 0.75)
+							this.coins.push(new Coin(coinData.x - 8, coinData.y - 8, coinData.value));
 						}
+						// 25% chance: Nothing (0.75 to 1.0)
+						
 						sounds.play('death');
 
 						// Explosion effect
@@ -164,6 +170,7 @@ export default class PlayState extends State {
 	}
 
 	onWaveComplete() {
+		sounds.play('waveComplete');
 		if (this.currentWave >= 5) {
 			// Victory!
 			stateMachine.change(GameStateName.Victory);

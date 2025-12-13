@@ -31,6 +31,41 @@
 			"volume": 0.15,
 			"loop": true,
 			"size": 1
+		},
+		{
+			"name": "gameOver",
+			"path": "./assets/sounds/gameOver.wav",
+			"volume": 0.5,
+			"loop": false,
+			"size": 1
+		},
+		{
+			"name": "waveComplete",
+			"path": "./assets/sounds/waveComplete.wav",
+			"volume": 0.4,
+			"loop": false,
+			"size": 1
+		},
+		{
+			"name": "win",
+			"path": "./assets/sounds/win.wav",
+			"volume": 0.5,
+			"loop": false,
+			"size": 1
+		},
+		{
+			"name": "coin",
+			"path": "./assets/sounds/coin.wav",
+			"volume": 0.3,
+			"loop": false,
+			"size": 5
+		},
+		{
+			"name": "health",
+			"path": "./assets/sounds/health.wav",
+			"volume": 0.3,
+			"loop": false,
+			"size": 5
 		}
 	]
 }
