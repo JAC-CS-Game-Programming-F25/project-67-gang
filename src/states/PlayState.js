@@ -103,17 +103,26 @@ export default class PlayState extends State {
 		// Update player
 		this.player.update(dt);
 
-		// Handle shooting
-		if (input.isMouseButtonHeld(Input.MOUSE.LEFT)) {
-			if (this.player.shoot()) {
-				const center = this.player.getCenter();
-				const bullet = new Bullet(center.x - 4, center.y - 4, this.player.aimAngle);
-				this.bullets.push(bullet);
-
-				this.particles.createMuzzleFlash(center.x, center.y, this.player.aimAngle);
-				sounds.play('shoot');
-			}
+	// Handle shooting
+	if (input.isMouseButtonHeld(Input.MOUSE.LEFT)) {
+		if (this.player.shoot()) {
+			const center = this.player.getCenter();
+			
+			// Create bullets based on weapon type
+			const newBullets = this.player.currentWeapon.createBullets(
+				center.x - 4, 
+				center.y - 4, 
+				this.player.aimAngle
+			);
+			this.bullets.push(...newBullets);
+			
+			// Muzzle flash
+			this.particles.createMuzzleFlash(center.x, center.y, this.player.aimAngle);
+			
+			// Shoot sound
+			sounds.play('shoot');
 		}
+	}
 
 		// Update bullets
 		this.bullets.forEach(bullet => bullet.update(dt));
@@ -167,7 +176,7 @@ export default class PlayState extends State {
 					const wasDead = enemy.isDead;
 					
 					enemy.takeDamage(bullet.damage);
-					bullet.cleanUp = true;
+					bullet.onHit(); // Handle piercing logic
 					
 					// Drop coin and explode if enemy just died
 					if (enemy.isDead && !wasDead) {
@@ -176,13 +185,10 @@ export default class PlayState extends State {
 						// Random drop: 25% health pack, 50% coin, 25% nothing
 						const dropRoll = Math.random();
 						if (dropRoll < 0.25) {
-							// 25% chance: Health pack
 							this.healthPacks.push(new HealthPack(coinData.x - 10, coinData.y - 10));
 						} else if (dropRoll < 0.75) {
-							// 50% chance: Coin (0.25 to 0.75)
 							this.coins.push(new Coin(coinData.x - 8, coinData.y - 8, coinData.value));
 						}
-						// 25% chance: Nothing (0.75 to 1.0)
 						
 						sounds.play('death');
 
@@ -286,6 +292,9 @@ export default class PlayState extends State {
 
 		// Coins
 		context.fillText(`Coins: ${stats.coins}`, 20, 120);
+		
+		// Current weapon - ADD THIS
+		context.fillText(`Weapon: ${this.player.currentWeapon.name} [1/2/3]`, 20, 150);
 		
 		context.restore();
 	}

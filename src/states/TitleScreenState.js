@@ -68,7 +68,7 @@ export default class TitleScreenState extends State {
 		// Controls
 		context.font = '16px Roboto';
 		context.fillStyle = '#888888';
-		context.fillText('WASD: Move | Mouse: Aim | Click: Shoot', CANVAS_WIDTH / 2, CANVAS_HEIGHT - 130);
+		context.fillText('WASD: Move | Mouse: Aim | Click: Shoot | 1/2/3: Weapons' , CANVAS_WIDTH / 2, CANVAS_HEIGHT - 130);
 		context.fillText('P: Pause | ESC: Quit to Menu (when paused)', CANVAS_WIDTH / 2, CANVAS_HEIGHT - 100);
 
 		context.restore();

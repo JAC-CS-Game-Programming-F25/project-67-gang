@@ -1,10 +1,13 @@
 import GameEntity from "./GameEntity.js";
 import { CANVAS_WIDTH, CANVAS_HEIGHT, PLAYER_SPEED, PLAYER_MAX_HEALTH, context, input, stats } from "../globals.js";
 import Input from "../../lib/Input.js";
+import AssaultRifle from "../objects/AssaultRifle.js";
+import Sniper from "../objects/Sniper.js";
+import Shotgun from "../objects/Shotgun.js";
 
 export default class Player extends GameEntity {
 	constructor(x, y) {
-		super(x, y, 40, 40); // 40x40 player size
+		super(x, y, 40, 40);
 		
 		this.maxHealth = PLAYER_MAX_HEALTH + (stats.healthUpgrades * 20);
 		this.health = this.maxHealth;
@@ -13,18 +16,22 @@ export default class Player extends GameEntity {
 		// Mouse aiming
 		this.aimAngle = 0;
 		
-		// Shooting
-		this.canShoot = true;
-		this.shootCooldown = 0.2; // 5 shots per second
-		this.shootTimer = 0;
+		// Weapon system
+		this.weapons = [
+			new AssaultRifle(),
+			new Shotgun(),
+			new Sniper()
+		];
+		this.currentWeaponIndex = 0;
+		this.currentWeapon = this.weapons[0];
 	}
 
 	update(dt) {
 		this.handleMovement(dt);
 		this.handleAiming();
-		this.updateShootTimer(dt);
+		this.handleWeaponSwitching();
+		this.currentWeapon.update(dt);
 		
-		// Keep player in bounds
 		this.position.x = Math.max(0, Math.min(CANVAS_WIDTH - this.dimensions.x, this.position.x));
 		this.position.y = Math.max(0, Math.min(CANVAS_HEIGHT - this.dimensions.y, this.position.y));
 	}
@@ -63,22 +70,8 @@ export default class Player extends GameEntity {
 		this.aimAngle = Math.atan2(dy, dx);
 	}
 
-	updateShootTimer(dt) {
-		if (!this.canShoot) {
-			this.shootTimer += dt;
-			if (this.shootTimer >= this.shootCooldown) {
-				this.canShoot = true;
-				this.shootTimer = 0;
-			}
-		}
-	}
-
 	shoot() {
-		if (this.canShoot) {
-			this.canShoot = false;
-			return true;
-		}
-		return false;
+		return this.currentWeapon.shoot();
 	}
 
 	takeDamage(amount) {
@@ -145,5 +138,25 @@ export default class Player extends GameEntity {
 			x: this.position.x + this.dimensions.x / 2,
 			y: this.position.y + this.dimensions.y / 2
 		};
+	}
+	handleWeaponSwitching() {
+		// Number keys 1, 2, 3 to switch weapons
+		if (input.isKeyPressed(Input.KEYS['1'])) {
+			this.switchWeapon(0);
+		}
+		if (input.isKeyPressed(Input.KEYS['2'])) {
+			this.switchWeapon(1);
+		}
+		if (input.isKeyPressed(Input.KEYS['3'])) {
+			this.switchWeapon(2);
+		}
+	}
+
+	switchWeapon(index) {
+		if (index >= 0 && index < this.weapons.length) {
+			this.currentWeaponIndex = index;
+			this.currentWeapon = this.weapons[index];
+			console.log('Switched to:', this.currentWeapon.name);
+		}
 	}
 }

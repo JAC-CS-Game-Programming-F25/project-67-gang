@@ -1,13 +1,18 @@
 import GameObject from "./GameObject.js";
-import { BULLET_SPEED, BULLET_DAMAGE, CANVAS_WIDTH, CANVAS_HEIGHT, context, stats } from "../globals.js";
+import { CANVAS_WIDTH, CANVAS_HEIGHT, context, stats } from "../globals.js";
 
 export default class Bullet extends GameObject {
-	constructor(x, y, angle) {
-		super(x, y, 8, 8); // Small bullet
+	constructor(x, y, angle, damage = 10, speed = 400) {
+		super(x, y, 8, 8);
 		
 		this.angle = angle;
-		this.speed = BULLET_SPEED;
-		this.damage = BULLET_DAMAGE * (1 + stats.damageUpgrades * 0.15);
+		this.speed = speed;
+		this.damage = damage;
+		
+		// Piercing properties (for sniper)
+		this.piercing = false;
+		this.maxPierceCount = 0;
+		this.pierceCount = 0;
 		
 		// Calculate velocity based on angle
 		this.velocity = {
@@ -24,6 +29,17 @@ export default class Bullet extends GameObject {
 		// Remove if out of bounds
 		if (this.position.x < -20 || this.position.x > CANVAS_WIDTH + 20 ||
 		    this.position.y < -20 || this.position.y > CANVAS_HEIGHT + 20) {
+			this.cleanUp = true;
+		}
+	}
+
+	onHit() {
+		if (this.piercing) {
+			this.pierceCount++;
+			if (this.pierceCount >= this.maxPierceCount) {
+				this.cleanUp = true;
+			}
+		} else {
 			this.cleanUp = true;
 		}
 	}
