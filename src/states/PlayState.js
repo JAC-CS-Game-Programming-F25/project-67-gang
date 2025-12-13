@@ -1,5 +1,5 @@
 import State from "../../lib/State.js";
-import { context, CANVAS_WIDTH, CANVAS_HEIGHT, input, stateMachine, stats, sounds, saveGameState, deleteSaveGame } from "../globals.js";
+import { context, CANVAS_WIDTH, CANVAS_HEIGHT, input, stateMachine, stats, sounds, saveGameState, deleteSaveGame, DAMAGE_UPGRADE_BONUS } from "../globals.js";
 import Input from "../../lib/Input.js";
 import Player from "../entities/Player.js";
 import Bullet from "../objects/Bullet.js";
@@ -304,20 +304,20 @@ export default class PlayState extends State {
 		const actualDamage = Math.floor(baseDamage * (1 + stats.damageUpgrades * 0.15));
 		context.fillText(`Weapon: ${this.player.currentWeapon.name} [1/2/3]`, 20, 150);
 		
-		// Weapon stats table 
+		// Weapon stats table
 		context.font = '14px Roboto';
 		context.fillStyle = '#00ffff';
-		context.fillText(`Base DMG: ${baseDamage} | Actual: ${actualDamage} (+${stats.damageUpgrades * 15}%)`, 20, 170);
+		context.fillText(`Base DMG: ${baseDamage} | Actual: ${actualDamage} (+${stats.damageUpgrades * DAMAGE_UPGRADE_BONUS * 100}%)`, 20, 170);
 		context.fillText(`Fire Rate: ${this.player.currentWeapon.fireRate.toFixed(2)}s`, 20, 190);
-		
+
 		// All weapons damage preview
 		context.fillStyle = '#888888';
 		context.font = '12px Roboto';
 		context.fillText('--- All Weapons ---', 20, 220);
-		
+
 		this.player.weapons.forEach((weapon, index) => {
 			const wepBase = weapon.damage;
-			const wepActual = Math.floor(wepBase * (1 + stats.damageUpgrades * 0.15));
+			const wepActual = Math.floor(wepBase * (1 + stats.damageUpgrades * DAMAGE_UPGRADE_BONUS));
 			const isActive = index === this.player.currentWeaponIndex ? '>' : ' ';
 			context.fillStyle = index === this.player.currentWeaponIndex ? '#00ff00' : '#888888';
 			context.fillText(`${isActive} [${index + 1}] ${weapon.name}: ${wepActual} DMG`, 20, 240 + index * 18);

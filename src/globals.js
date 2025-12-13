@@ -38,6 +38,8 @@ export const PLAYER_SPEED = 200;
 export const PLAYER_MAX_HEALTH = 100;
 export const BULLET_SPEED = 400;
 export const BULLET_DAMAGE = 10;
+export const HEALTH_UPGRADE_BONUS = 5;
+export const DAMAGE_UPGRADE_BONUS = 0.05; 
 
 // Global game stats
 export const stats = {

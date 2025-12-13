@@ -1,4 +1,4 @@
-import { stats } from "../globals.js";
+import { stats , DAMAGE_UPGRADE_BONUS} from "../globals.js";
 export default class Weapon {
 	constructor() {
 		this.damage = 10;
@@ -28,7 +28,7 @@ export default class Weapon {
 	}
 
 	getActualDamage() {
-		return Math.floor(this.damage * (1 + stats.damageUpgrades * 0.15));
+		return Math.floor(this.damage * (1 + stats.damageUpgrades * DAMAGE_UPGRADE_BONUS));
 	}
 
 	// Override in subclasses

@@ -1,5 +1,5 @@
 import GameEntity from "./GameEntity.js";
-import { CANVAS_WIDTH, CANVAS_HEIGHT, PLAYER_SPEED, PLAYER_MAX_HEALTH, context, input, stats } from "../globals.js";
+import { CANVAS_WIDTH, CANVAS_HEIGHT, PLAYER_SPEED, PLAYER_MAX_HEALTH, HEALTH_UPGRADE_BONUS, context, input, stats } from "../globals.js";
 import Input from "../../lib/Input.js";
 import AssaultRifle from "../objects/AssaultRifle.js";
 import Sniper from "../objects/Sniper.js";
@@ -9,7 +9,7 @@ export default class Player extends GameEntity {
 	constructor(x, y) {
 		super(x, y, 40, 40);
 		
-		this.maxHealth = PLAYER_MAX_HEALTH + (stats.healthUpgrades * 20);
+		this.maxHealth = PLAYER_MAX_HEALTH + (stats.healthUpgrades * HEALTH_UPGRADE_BONUS);
 		this.health = this.maxHealth;
 		this.speed = PLAYER_SPEED;
 		
