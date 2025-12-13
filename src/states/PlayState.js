@@ -8,7 +8,7 @@ import EnemyFactory from "../services/EnemyFactory.js";
 import Coin from "../objects/Coin.js";
 import ParticleSystem from "../services/ParticleSystem.js";
 import HealthPack from "../objects/HealthPack.js";
-
+import EnemyType from "../enums/EnemyType.js";
 export default class PlayState extends State {
 	constructor() {
 		super();
@@ -176,11 +176,18 @@ export default class PlayState extends State {
 					const wasDead = enemy.isDead;
 					
 					enemy.takeDamage(bullet.damage);
-					bullet.onHit(); // Handle piercing logic
+					bullet.onHit();
 					
 					// Drop coin and explode if enemy just died
 					if (enemy.isDead && !wasDead) {
-						const coinData = enemy.dropCoin();
+						const coinData = enemy.dropCoin();	
+					// Handle splitter spawning 2 small enemies
+					if (enemy.shouldSplit) {
+						const { x, y } = coinData;
+						this.enemies.push(EnemyFactory.createEnemy(EnemyType.Splitter, x - 20, y, true));
+						this.enemies.push(EnemyFactory.createEnemy(EnemyType.Splitter, x + 20, y, true));
+						console.log('Splitter split into 2 small enemies!'); // Debug log
+					}
 						
 						// Random drop: 25% health pack, 50% coin, 25% nothing
 						const dropRoll = Math.random();
@@ -207,9 +214,8 @@ export default class PlayState extends State {
 
 	checkPlayerEnemyCollisions() {
 		this.enemies.forEach(enemy => {
-			if (this.player.didCollideWithEntity(enemy)) {
-				this.player.takeDamage(enemy.damage);
-				enemy.isDead = true; // Enemy dies on contact
+			if (!this.player.isInvincible && this.player.didCollideWithEntity(enemy)) {
+				this.player.takeDamage(enemy.damage); // Use enemy's damage value
 			}
 		});
 	}
@@ -230,7 +236,7 @@ export default class PlayState extends State {
 
 	onWaveComplete() {
 		sounds.play('waveComplete');
-		if (this.currentWave >= 5) {
+		if (this.currentWave >= 20) {
 			// Victory!
 			deleteSaveGame();
 			stateMachine.change(GameStateName.Victory);
@@ -285,7 +291,7 @@ export default class PlayState extends State {
 		context.fillText(`HP: ${Math.ceil(this.player.health)}/${this.player.maxHealth}`, 20, 30);
 		
 		// Wave
-		context.fillText(`Wave: ${this.currentWave}/5`, 20, 60);
+		context.fillText(`Wave: ${this.currentWave}/20`, 20, 60);
 		
 		// Enemies remaining
 		context.fillText(`Enemies: ${this.enemies.length}`, 20, 90);
@@ -293,9 +299,29 @@ export default class PlayState extends State {
 		// Coins
 		context.fillText(`Coins: ${stats.coins}`, 20, 120);
 		
-		// Current weapon - ADD THIS
+		// Current weapon with damage
+		const baseDamage = this.player.currentWeapon.damage;
+		const actualDamage = Math.floor(baseDamage * (1 + stats.damageUpgrades * 0.15));
 		context.fillText(`Weapon: ${this.player.currentWeapon.name} [1/2/3]`, 20, 150);
 		
+		// Weapon stats table 
+		context.font = '14px Roboto';
+		context.fillStyle = '#00ffff';
+		context.fillText(`Base DMG: ${baseDamage} | Actual: ${actualDamage} (+${stats.damageUpgrades * 15}%)`, 20, 170);
+		context.fillText(`Fire Rate: ${this.player.currentWeapon.fireRate.toFixed(2)}s`, 20, 190);
+		
+		// All weapons damage preview
+		context.fillStyle = '#888888';
+		context.font = '12px Roboto';
+		context.fillText('--- All Weapons ---', 20, 220);
+		
+		this.player.weapons.forEach((weapon, index) => {
+			const wepBase = weapon.damage;
+			const wepActual = Math.floor(wepBase * (1 + stats.damageUpgrades * 0.15));
+			const isActive = index === this.player.currentWeaponIndex ? '>' : ' ';
+			context.fillStyle = index === this.player.currentWeaponIndex ? '#00ff00' : '#888888';
+			context.fillText(`${isActive} [${index + 1}] ${weapon.name}: ${wepActual} DMG`, 20, 240 + index * 18);
+		});
 		context.restore();
 	}
 }

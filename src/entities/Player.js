@@ -24,6 +24,11 @@ export default class Player extends GameEntity {
 		];
 		this.currentWeaponIndex = 0;
 		this.currentWeapon = this.weapons[0];
+
+		// Invincibility frames
+		this.isInvincible = false;
+		this.invincibilityTimer = 0;
+		this.invincibilityDuration = 2.0; // 2 seconds
 	}
 
 	update(dt) {
@@ -31,6 +36,14 @@ export default class Player extends GameEntity {
 		this.handleAiming();
 		this.handleWeaponSwitching();
 		this.currentWeapon.update(dt);
+		// Update invincibility timer
+		if (this.isInvincible) {
+			this.invincibilityTimer += dt;
+			if (this.invincibilityTimer >= this.invincibilityDuration) {
+				this.isInvincible = false;
+				this.invincibilityTimer = 0;
+			}
+		}
 		
 		this.position.x = Math.max(0, Math.min(CANVAS_WIDTH - this.dimensions.x, this.position.x));
 		this.position.y = Math.max(0, Math.min(CANVAS_HEIGHT - this.dimensions.y, this.position.y));
@@ -75,7 +88,12 @@ export default class Player extends GameEntity {
 	}
 
 	takeDamage(amount) {
+		if (this.isInvincible) return; // Can't take damage while invincible
+		
 		this.health -= amount;
+		this.isInvincible = true; // Activate invincibility
+		this.invincibilityTimer = 0;
+		
 		if (this.health <= 0) {
 			this.health = 0;
 			this.isDead = true;
@@ -88,7 +106,13 @@ export default class Player extends GameEntity {
 
 	render() {
 		context.save();
-
+		// Flashing effect when invincible
+		if (this.isInvincible) {
+			const flash = Math.floor(this.invincibilityTimer * 10) % 2 === 0;
+			if (flash) {
+				context.globalAlpha = 0.5; // Transparent
+			}
+		}
 		// Draw player as a cyan triangle (spaceship)
 		context.translate(this.position.x + this.dimensions.x / 2, this.position.y + this.dimensions.y / 2);
 		context.rotate(this.aimAngle);

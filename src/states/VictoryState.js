@@ -8,8 +8,8 @@ export default class VictoryState extends State {
 	}
 
 	enter() {
-		// Always save on victory (beat wave 5)
-		saveHighScore(5, stats.kills, stats.coins);
+		// Always save on victory (beat wave 20)
+		saveHighScore(20, stats.kills, stats.coins);
 		this.highScore = getHighScore();
 
 		sounds.play('win');
@@ -38,7 +38,7 @@ export default class VictoryState extends State {
 		// Congratulations
 		context.fillStyle = '#00ffff';
 		context.font = '30px Roboto';
-		context.fillText('You survived all 5 waves!', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 60);
+		context.fillText('You survived all 20 waves!', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 60);
 		
 		// Stats
 		context.fillStyle = '#ffffff';

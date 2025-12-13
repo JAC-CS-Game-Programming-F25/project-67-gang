@@ -1,7 +1,8 @@
+import { stats } from "../globals.js";
 export default class Weapon {
 	constructor() {
 		this.damage = 10;
-		this.fireRate = 0.2; // Time between shots
+		this.fireRate = 0.2;
 		this.shootTimer = 0;
 		this.canShoot = true;
 		this.bulletSpeed = 400;
@@ -24,6 +25,10 @@ export default class Weapon {
 			return true;
 		}
 		return false;
+	}
+
+	getActualDamage() {
+		return Math.floor(this.damage * (1 + stats.damageUpgrades * 0.15));
 	}
 
 	// Override in subclasses

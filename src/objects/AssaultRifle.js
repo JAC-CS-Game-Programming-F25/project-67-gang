@@ -11,6 +11,6 @@ export default class AssaultRifle extends Weapon {
 	}
 
 	createBullets(x, y, angle) {
-		return [new Bullet(x, y, angle, this.damage, this.bulletSpeed)];
+		return [new Bullet(x, y, angle, this.getActualDamage(), this.bulletSpeed)];
 	}
 }
