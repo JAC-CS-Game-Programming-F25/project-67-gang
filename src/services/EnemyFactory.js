@@ -5,6 +5,9 @@ import Turret from "../entities/Turret.js";
 import Splitter from "../entities/Splitter.js";
 import Elite from "../entities/Elite.js";
 import Boss from "../entities/Boss.js";
+import Teleporter from "../entities/Teleporter.js";
+import Shielder from "../entities/Shielder.js";
+import Spawner from "../entities/Spawner.js";
 
 export default class EnemyFactory {
 	static createEnemy(type, x, y, isSmall = false) {
@@ -19,6 +22,12 @@ export default class EnemyFactory {
 				return new Splitter(x, y, isSmall);
 			case EnemyType.Elite:
 				return new Elite(x, y);
+			case EnemyType.Teleporter:
+				return new Teleporter(x, y);
+			case EnemyType.Shielder:
+				return new Shielder(x, y);
+			case EnemyType.Spawner:
+				return new Spawner(x, y);
 			default:
 				return new Drone(x, y);
 		}
@@ -75,23 +84,46 @@ export default class EnemyFactory {
 	static getRandomEnemyType(waveNumber) {
 		const rand = Math.random();
 		
-		// Early waves (1-5): Mostly drones and tanks
-		if (waveNumber <= 5) {
+		// Early waves (1-4): Mostly drones and tanks
+		if (waveNumber <= 4) {
 			return rand < 0.7 ? EnemyType.Drone : EnemyType.Tank;
 		}
-		// Mid waves (6-12): Add turrets and splitters
-		else if (waveNumber <= 12) {
-			if (rand < 0.4) return EnemyType.Drone;
-			if (rand < 0.6) return EnemyType.Tank;
-			if (rand < 0.8) return EnemyType.Turret;
+		// Waves 5-7: Add turrets and splitters
+		else if (waveNumber <= 7) {
+			if (rand < 0.35) return EnemyType.Drone;
+			if (rand < 0.55) return EnemyType.Tank;
+			if (rand < 0.75) return EnemyType.Turret;
 			return EnemyType.Splitter;
 		}
-		// Late waves (13+): All enemy types including elite
+		// Waves 8-11: Add teleporters and shielders
+		else if (waveNumber <= 11) {
+			if (rand < 0.2) return EnemyType.Drone;
+			if (rand < 0.35) return EnemyType.Tank;
+			if (rand < 0.5) return EnemyType.Turret;
+			if (rand < 0.65) return EnemyType.Splitter;
+			if (rand < 0.8) return EnemyType.Teleporter;
+			return EnemyType.Shielder;
+		}
+		// Waves 12-15: Add spawners
+		else if (waveNumber <= 15) {
+			if (rand < 0.15) return EnemyType.Drone;
+			if (rand < 0.28) return EnemyType.Tank;
+			if (rand < 0.4) return EnemyType.Turret;
+			if (rand < 0.52) return EnemyType.Splitter;
+			if (rand < 0.64) return EnemyType.Teleporter;
+			if (rand < 0.76) return EnemyType.Shielder;
+			if (rand < 0.88) return EnemyType.Spawner;
+			return EnemyType.Elite;
+		}
+		// Late waves (16+): All enemy types with elites more common
 		else {
-			if (rand < 0.25) return EnemyType.Drone;
-			if (rand < 0.45) return EnemyType.Tank;
-			if (rand < 0.6) return EnemyType.Turret;
-			if (rand < 0.75) return EnemyType.Splitter;
+			if (rand < 0.1) return EnemyType.Drone;
+			if (rand < 0.2) return EnemyType.Tank;
+			if (rand < 0.3) return EnemyType.Turret;
+			if (rand < 0.42) return EnemyType.Splitter;
+			if (rand < 0.54) return EnemyType.Teleporter;
+			if (rand < 0.66) return EnemyType.Shielder;
+			if (rand < 0.78) return EnemyType.Spawner;
 			return EnemyType.Elite;
 		}
 	}

@@ -19,13 +19,13 @@ export default class PauseState extends State {
 	update(dt) {
 		this.time += dt * 1000;
 		
-		// Press P to resume
-		if (input.isKeyPressed(Input.KEYS.P)) {
+		// Press ESC or P to resume
+		if (input.isKeyPressed(Input.KEYS.ESCAPE) || input.isKeyPressed(Input.KEYS.P)) {
 			stateMachine.change(GameStateName.Play, this.playStateData);
 		}
 		
-		// Press ESC to quit to title
-		if (input.isKeyPressed(Input.KEYS.ESCAPE)) {
+		// Press Q to quit to title
+		if (input.isKeyPressed(Input.KEYS.Q)) {
 			stateMachine.change(GameStateName.TitleScreen);
 		}
 	}
@@ -57,8 +57,8 @@ export default class PauseState extends State {
 		
 		// Menu options
 		const optionsY = CANVAS_HEIGHT / 2 + 100;
-		UIRenderer.renderButton('RESUME  [P]', CANVAS_WIDTH / 2, optionsY, true, '#00ff88');
-		UIRenderer.renderButton('QUIT  [ESC]', CANVAS_WIDTH / 2, optionsY + 55, false, '#ff4444');
+		UIRenderer.renderButton('RESUME  [ESC]', CANVAS_WIDTH / 2, optionsY, true, '#00ff88');
+		UIRenderer.renderButton('QUIT  [Q]', CANVAS_WIDTH / 2, optionsY + 55, false, '#ff4444');
 		
 		// Hint
 		UIRenderer.renderText('Progress is auto-saved', CANVAS_WIDTH / 2, CANVAS_HEIGHT - 50, '#555555', 14);

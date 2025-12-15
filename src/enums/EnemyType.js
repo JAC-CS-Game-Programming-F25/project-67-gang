@@ -4,6 +4,9 @@ const EnemyType = {
 	Turret: 'turret',
 	Splitter: 'splitter',
 	Elite: 'elite',
+	Teleporter: 'teleporter',
+	Shielder: 'shielder',
+	Spawner: 'spawner',
 };
 
 export default EnemyType;
