@@ -19,7 +19,7 @@ export default class Shotgun extends Weapon {
 		// Create multiple pellets in a spread
 		for (let i = 0; i < this.pelletCount; i++) {
 			const spreadAngle = angle + (Math.random() - 0.5) * this.spread;
-			bullets.push(new Bullet(x, y, spreadAngle, actualDamage, this.bulletSpeed));
+			bullets.push(new Bullet(x, y, spreadAngle, actualDamage, this.bulletSpeed, 'shotgun'));
 		}
 		
 		return bullets;

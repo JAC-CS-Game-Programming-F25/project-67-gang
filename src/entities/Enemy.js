@@ -1,5 +1,6 @@
 import GameEntity from "./GameEntity.js";
 import { context, stats, addCoins } from "../globals.js";
+import SpriteManager from "../services/SpriteManager.js";
 
 export default class Enemy extends GameEntity {
 	constructor(x, y, width, height) {
@@ -10,7 +11,14 @@ export default class Enemy extends GameEntity {
 		this.speed = 100;
 		this.damage = 10;
 		this.coinValue = 5;
-		this.color = '#ff00ff'; // Magenta by default
+		this.color = '#ff00ff'; // Magenta by default (fallback)
+		
+		// Sprite configuration - override in subclasses
+		this.spriteName = null;
+		this.spriteWidth = width;
+		this.spriteHeight = height;
+		this.rotation = 0; // For facing direction
+		this.glowColor = '#ff00ff';
 	}
 
 	takeDamage(amount) {
@@ -36,21 +44,51 @@ export default class Enemy extends GameEntity {
 			// Normalize and apply speed
 			this.velocity.x = (dx / distance) * this.speed;
 			this.velocity.y = (dy / distance) * this.speed;
+			
+			// Update rotation to face player
+			this.rotation = Math.atan2(dy, dx) + Math.PI / 2;
 		}
 	}
 
 	render() {
-		// Draw enemy shape
-		context.save();
-		context.fillStyle = this.color;
-		context.fillRect(this.position.x, this.position.y, this.dimensions.x, this.dimensions.y);
-		
-		// Outline
-		context.strokeStyle = '#ffffff';
-		context.lineWidth = 2;
-		context.strokeRect(this.position.x, this.position.y, this.dimensions.x, this.dimensions.y);
-		
-		context.restore();
+		const centerX = this.position.x + this.dimensions.x / 2;
+		const centerY = this.position.y + this.dimensions.y / 2;
+
+		// Render with sprite if available
+		if (this.spriteName && SpriteManager.get(this.spriteName)) {
+			// Glow effect underneath
+			context.save();
+			context.globalAlpha = 0.4;
+			context.shadowColor = this.glowColor;
+			context.shadowBlur = 15;
+			context.beginPath();
+			context.arc(centerX, centerY, this.dimensions.x / 2, 0, Math.PI * 2);
+			context.fillStyle = this.glowColor;
+			context.fill();
+			context.restore();
+
+			// Render sprite
+			SpriteManager.render(
+				this.spriteName,
+				centerX,
+				centerY,
+				this.spriteWidth,
+				this.spriteHeight,
+				this.rotation
+			);
+		} else {
+			// Fallback to colored rectangle
+			context.save();
+			context.fillStyle = this.color;
+			context.fillRect(this.position.x, this.position.y, this.dimensions.x, this.dimensions.y);
+			
+			// Outline
+			context.strokeStyle = '#ffffff';
+			context.lineWidth = 2;
+			context.strokeRect(this.position.x, this.position.y, this.dimensions.x, this.dimensions.y);
+			
+			context.restore();
+		}
 
 		// Health bar
 		this.renderHealthBar();

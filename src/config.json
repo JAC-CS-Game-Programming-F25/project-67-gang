@@ -1,15 +1,187 @@
 {
-	"images": [],
-	"fonts": [
+	"images": [
 		{
-			"name": "Orbitron",
-			"path": "https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap"
+			"name": "player-ship",
+			"path": "./assets/game-assets/Ships - Missiles/Variation_A/0.5x/Ship_1_A_Small.png",
+			"width": 64,
+			"height": 64
 		},
 		{
-			"name": "Roboto",
-			"path": "https://fonts.googleapis.com/css2?family=Roboto&display=swap"
+			"name": "drone",
+			"path": "./assets/game-assets/Enemies - Base/0.5x/Enemy_1_A_Small.png",
+			"width": 64,
+			"height": 64
+		},
+		{
+			"name": "tank",
+			"path": "./assets/game-assets/Enemies - Base/0.5x/Enemy_2_A_Small.png",
+			"width": 64,
+			"height": 64
+		},
+		{
+			"name": "turret",
+			"path": "./assets/game-assets/Enemies - Base/0.5x/Enemy_3_A_Small.png",
+			"width": 64,
+			"height": 64
+		},
+		{
+			"name": "splitter",
+			"path": "./assets/game-assets/Enemies - Insectoids/0.5x/Insectoid_1_A_Small.png",
+			"width": 64,
+			"height": 64
+		},
+		{
+			"name": "elite",
+			"path": "./assets/game-assets/Enemies - Abyssal/0.5x/Abyssal_1_A_Small.png",
+			"width": 64,
+			"height": 64
+		},
+		{
+			"name": "boss-1",
+			"path": "./assets/game-assets/Enemies - Base/1x/Boss_1_A_Medium.png",
+			"width": 128,
+			"height": 128
+		},
+		{
+			"name": "boss-2",
+			"path": "./assets/game-assets/Enemies - Insectoids/1x/Insectoid_Boss_1_A_Medium.png",
+			"width": 128,
+			"height": 128
+		},
+		{
+			"name": "boss-3",
+			"path": "./assets/game-assets/Enemies - Abyssal/1x/Abyssal_Boss_1_A_Medium.png",
+			"width": 128,
+			"height": 128
+		},
+		{
+			"name": "boss-4",
+			"path": "./assets/game-assets/Enemies - Abyssal/1x/Abyssal_Boss_2_A_Medium.png",
+			"width": 128,
+			"height": 128
+		},
+		{
+			"name": "projectile-player",
+			"path": "./assets/game-assets/Projectiles/Variation A/Projectile_1_A.png",
+			"width": 32,
+			"height": 32
+		},
+		{
+			"name": "projectile-shotgun",
+			"path": "./assets/game-assets/Projectiles/Variation A/Projectile_3_A.png",
+			"width": 32,
+			"height": 32
+		},
+		{
+			"name": "projectile-sniper",
+			"path": "./assets/game-assets/Projectiles/Variation A/Projectile_5_A.png",
+			"width": 32,
+			"height": 32
+		},
+		{
+			"name": "projectile-enemy",
+			"path": "./assets/game-assets/Projectiles/Variation B/Projectile_2_B.png",
+			"width": 32,
+			"height": 32
+		},
+		{
+			"name": "pickup-health",
+			"path": "./assets/game-assets/Pickups/0.5x/Pickup_HealthPack_Small.png",
+			"width": 32,
+			"height": 32
+		},
+		{
+			"name": "pickup-coin",
+			"path": "./assets/game-assets/Pickups/0.5x/Pickup_Icon_1_Small.png",
+			"width": 32,
+			"height": 32
+		},
+		{
+			"name": "pickup-crate",
+			"path": "./assets/game-assets/Pickups/0.5x/Pickup_Crate_1_Small.png",
+			"width": 32,
+			"height": 32
+		},
+		{
+			"name": "particle-glow",
+			"path": "./assets/game-assets/Particles/Misc/Glow.png",
+			"width": 64,
+			"height": 64
+		},
+		{
+			"name": "particle-smoke",
+			"path": "./assets/game-assets/Particles/Misc/Smoke.png",
+			"width": 64,
+			"height": 64
+		},
+		{
+			"name": "particle-circle",
+			"path": "./assets/game-assets/Particles/Misc/Circle.png",
+			"width": 64,
+			"height": 64
+		},
+		{
+			"name": "particle-debris",
+			"path": "./assets/game-assets/Particles/Misc/Debris.png",
+			"width": 64,
+			"height": 64
+		},
+		{
+			"name": "chunk-1",
+			"path": "./assets/game-assets/Particles/Chunks Base/0.5x/Part_1_A_Small.png",
+			"width": 32,
+			"height": 32
+		},
+		{
+			"name": "chunk-2",
+			"path": "./assets/game-assets/Particles/Chunks Base/0.5x/Part_2_A_Small.png",
+			"width": 32,
+			"height": 32
+		},
+		{
+			"name": "chunk-3",
+			"path": "./assets/game-assets/Particles/Chunks Base/0.5x/Part_3_A_Small.png",
+			"width": 32,
+			"height": 32
+		},
+		{
+			"name": "chunk-4",
+			"path": "./assets/game-assets/Particles/Chunks Base/0.5x/Part_4_A_Small.png",
+			"width": 32,
+			"height": 32
+		},
+		{
+			"name": "rock-1",
+			"path": "./assets/game-assets/Environment/0.5x/Rock_1_Small.png",
+			"width": 64,
+			"height": 64
+		},
+		{
+			"name": "rock-2",
+			"path": "./assets/game-assets/Environment/0.5x/Rock_2_Small.png",
+			"width": 64,
+			"height": 64
+		},
+		{
+			"name": "rock-3",
+			"path": "./assets/game-assets/Environment/0.5x/Rock_3_Small.png",
+			"width": 64,
+			"height": 64
+		},
+		{
+			"name": "meteor-1",
+			"path": "./assets/game-assets/Meteors - Chunks/0.5x/Meteor_1_A_Small.png",
+			"width": 64,
+			"height": 64
+		},
+		{
+			"name": "meteor-2",
+			"path": "./assets/game-assets/Meteors - Chunks/0.5x/Meteor_2_A_Small.png",
+			"width": 64,
+			"height": 64
 		}
 	],
+	"fonts": [],
 	"sounds": [
 		{
 			"name": "shoot",

@@ -1,4 +1,5 @@
 import Enemy from "./Enemy.js";
+import SpriteManager from "../services/SpriteManager.js";
 
 export default class Drone extends Enemy {
 	constructor(x, y) {
@@ -9,7 +10,13 @@ export default class Drone extends Enemy {
 		this.speed = 120;
 		this.damage = 10;
 		this.coinValue = 5;
-		this.color = '#ff00ff'; // Magenta
+		this.color = '#ff00ff'; // Magenta fallback
+		
+		// Sprite configuration
+		this.spriteName = SpriteManager.sprites.enemies.drone;
+		this.spriteWidth = 40;
+		this.spriteHeight = 40;
+		this.glowColor = '#ff4444';
 	}
 
 	update(dt, player) {

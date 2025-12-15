@@ -4,6 +4,7 @@ import Input from "../../lib/Input.js";
 import AssaultRifle from "../objects/AssaultRifle.js";
 import Sniper from "../objects/Sniper.js";
 import Shotgun from "../objects/Shotgun.js";
+import SpriteManager from "../services/SpriteManager.js";
 
 export default class Player extends GameEntity {
 	constructor(x, y) {
@@ -29,6 +30,10 @@ export default class Player extends GameEntity {
 		this.isInvincible = false;
 		this.invincibilityTimer = 0;
 		this.invincibilityDuration = 2.0; // 2 seconds
+
+		// Sprite size (slightly larger for visual impact)
+		this.spriteWidth = 50;
+		this.spriteHeight = 50;
 	}
 
 	update(dt) {
@@ -105,32 +110,38 @@ export default class Player extends GameEntity {
 	}
 
 	render() {
-		context.save();
+		const centerX = this.position.x + this.dimensions.x / 2;
+		const centerY = this.position.y + this.dimensions.y / 2;
+
 		// Flashing effect when invincible
+		let alpha = 1;
 		if (this.isInvincible) {
 			const flash = Math.floor(this.invincibilityTimer * 10) % 2 === 0;
-			if (flash) {
-				context.globalAlpha = 0.5; // Transparent
-			}
+			alpha = flash ? 0.5 : 1;
 		}
-		// Draw player as a cyan triangle (spaceship)
-		context.translate(this.position.x + this.dimensions.x / 2, this.position.y + this.dimensions.y / 2);
-		context.rotate(this.aimAngle);
-		
-		context.fillStyle = '#00ffff';
-		context.beginPath();
-		context.moveTo(20, 0);  // Front point
-		context.lineTo(-15, -12); // Back left
-		context.lineTo(-15, 12);  // Back right
-		context.closePath();
-		context.fill();
-		
-		// Outline
-		context.strokeStyle = '#ffffff';
-		context.lineWidth = 2;
-		context.stroke();
 
+		// Render glow effect underneath
+		context.save();
+		context.globalAlpha = alpha * 0.6;
+		context.shadowColor = '#00ffff';
+		context.shadowBlur = 20;
+		context.beginPath();
+		context.arc(centerX, centerY, 20, 0, Math.PI * 2);
+		context.fillStyle = '#00ffff';
+		context.fill();
 		context.restore();
+
+		// Render ship sprite with rotation
+		// Add Math.PI/2 to adjust for sprite facing "up" by default
+		SpriteManager.render(
+			SpriteManager.sprites.player,
+			centerX,
+			centerY,
+			this.spriteWidth,
+			this.spriteHeight,
+			this.aimAngle + Math.PI / 2,
+			alpha
+		);
 
 		// Health bar above player
 		this.renderHealthBar();

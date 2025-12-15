@@ -12,7 +12,7 @@ export default class Sniper extends Weapon {
 	}
 
 	createBullets(x, y, angle) {
-		const bullet = new Bullet(x, y, angle, this.getActualDamage(), this.bulletSpeed);
+		const bullet = new Bullet(x, y, angle, this.getActualDamage(), this.bulletSpeed, 'sniper');
 		bullet.piercing = true;
 		bullet.maxPierceCount = 3;
 		bullet.pierceCount = 0;

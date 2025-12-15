@@ -9,9 +9,13 @@ import Coin from "../objects/Coin.js";
 import ParticleSystem from "../services/ParticleSystem.js";
 import HealthPack from "../objects/HealthPack.js";
 import EnemyType from "../enums/EnemyType.js";
+import BackgroundManager from "../services/BackgroundManager.js";
+import UIRenderer from "../services/UIRenderer.js";
+
 export default class PlayState extends State {
 	constructor() {
 		super();
+		this.background = new BackgroundManager();
 	}
 
 	enter(params = {}) {
@@ -67,6 +71,9 @@ export default class PlayState extends State {
 		this.healthPacks = [];
 		this.particles = new ParticleSystem();
 		
+		// Reset background for variety
+		this.background.reset();
+		
 		// Spawn wave
 		this.spawnWave();
 		
@@ -100,6 +107,10 @@ export default class PlayState extends State {
 			});
 			return; // Stop updating when paused
 		}
+
+		// Update background (floating meteors, star twinkle)
+		this.background.update(dt);
+
 		// Update player
 		this.player.update(dt);
 
@@ -176,6 +187,21 @@ export default class PlayState extends State {
 					const wasDead = enemy.isDead;
 					
 					enemy.takeDamage(bullet.damage);
+					
+					// Impact effect
+					this.particles.createImpact(
+						bullet.position.x + bullet.dimensions.x / 2,
+						bullet.position.y + bullet.dimensions.y / 2,
+						enemy.glowColor || '#ffffff'
+					);
+					
+					// Damage number
+					this.particles.createDamageNumber(
+						enemy.position.x + enemy.dimensions.x / 2,
+						enemy.position.y,
+						bullet.damage
+					);
+					
 					bullet.onHit();
 					
 					// Drop coin and explode if enemy just died
@@ -186,7 +212,7 @@ export default class PlayState extends State {
 						const { x, y } = coinData;
 						this.enemies.push(EnemyFactory.createEnemy(EnemyType.Splitter, x - 20, y, true));
 						this.enemies.push(EnemyFactory.createEnemy(EnemyType.Splitter, x + 20, y, true));
-						console.log('Splitter split into 2 small enemies!'); // Debug log
+						console.log('Splitter split into 2 small enemies!');
 					}
 						
 						// Random drop: 25% health pack, 50% coin, 25% nothing
@@ -199,13 +225,21 @@ export default class PlayState extends State {
 						
 						sounds.play('death');
 
-						// Explosion effect
-						this.particles.createExplosion(
-							coinData.x, 
-							coinData.y, 
-							enemy.color, 
-							20
-						);
+						// Enhanced death explosion based on enemy type
+						if (enemy.isBoss) {
+							this.particles.createBossDeathExplosion(
+								coinData.x, 
+								coinData.y, 
+								enemy.glowColor || '#ff4444'
+							);
+						} else {
+							this.particles.createDeathExplosion(
+								coinData.x, 
+								coinData.y, 
+								enemy.glowColor || '#ff00ff',
+								6
+							);
+						}
 					}
 				}
 			});
@@ -215,7 +249,14 @@ export default class PlayState extends State {
 	checkPlayerEnemyCollisions() {
 		this.enemies.forEach(enemy => {
 			if (!this.player.isInvincible && this.player.didCollideWithEntity(enemy)) {
-				this.player.takeDamage(enemy.damage); // Use enemy's damage value
+				this.player.takeDamage(enemy.damage);
+				
+				// Impact effect on player
+				this.particles.createImpact(
+					this.player.position.x + this.player.dimensions.x / 2,
+					this.player.position.y + this.player.dimensions.y / 2,
+					'#ff0000'
+				);
 			}
 		});
 	}
@@ -253,9 +294,8 @@ export default class PlayState extends State {
 	render() {
 		context.save();
 		
-		// Dark background
-		context.fillStyle = '#0a0a1a';
-		context.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+		// Render background (gradient, grid, stars, rocks, meteors)
+		this.background.render();
 		
 		// Render enemies
 		this.enemies.forEach(enemy => enemy.render());
@@ -283,45 +323,157 @@ export default class PlayState extends State {
 
 	renderHUD() {
 		context.save();
-		context.fillStyle = '#ffffff';
-		context.font = '20px Roboto';
-		context.textAlign = 'left';
 		
-		// Health
-		context.fillText(`HP: ${Math.ceil(this.player.health)}/${this.player.maxHealth}`, 20, 30);
+		// Top-left status panel
+		this.renderStatusPanel();
 		
-		// Wave
-		context.fillText(`Wave: ${this.currentWave}/20`, 20, 60);
+		// Top-right wave indicator
+		this.renderWaveIndicator();
 		
-		// Enemies remaining
-		context.fillText(`Enemies: ${this.enemies.length}`, 20, 90);
-
-		// Coins
-		context.fillText(`Coins: ${stats.coins}`, 20, 120);
+		// Bottom weapon bar
+		this.renderWeaponBar();
 		
-		// Current weapon with damage
-		const baseDamage = this.player.currentWeapon.damage;
-		const actualDamage = Math.floor(baseDamage * (1 + stats.damageUpgrades * 0.15));
-		context.fillText(`Weapon: ${this.player.currentWeapon.name} [1/2/3]`, 20, 150);
-		
-		// Weapon stats table
-		context.font = '14px Roboto';
-		context.fillStyle = '#00ffff';
-		context.fillText(`Base DMG: ${baseDamage} | Actual: ${actualDamage} (+${stats.damageUpgrades * DAMAGE_UPGRADE_BONUS * 100}%)`, 20, 170);
-		context.fillText(`Fire Rate: ${this.player.currentWeapon.fireRate.toFixed(2)}s`, 20, 190);
-
-		// All weapons damage preview
-		context.fillStyle = '#888888';
-		context.font = '12px Roboto';
-		context.fillText('--- All Weapons ---', 20, 220);
-
-		this.player.weapons.forEach((weapon, index) => {
-			const wepBase = weapon.damage;
-			const wepActual = Math.floor(wepBase * (1 + stats.damageUpgrades * DAMAGE_UPGRADE_BONUS));
-			const isActive = index === this.player.currentWeaponIndex ? '>' : ' ';
-			context.fillStyle = index === this.player.currentWeaponIndex ? '#00ff00' : '#888888';
-			context.fillText(`${isActive} [${index + 1}] ${weapon.name}: ${wepActual} DMG`, 20, 240 + index * 18);
-		});
 		context.restore();
+	}
+
+	renderStatusPanel() {
+		const x = 15;
+		const y = 15;
+		const width = 220;
+		const height = 90;
+		
+		// Panel background
+		context.fillStyle = 'rgba(10, 20, 40, 0.85)';
+		context.strokeStyle = '#00ffff';
+		context.lineWidth = 1;
+		context.beginPath();
+		context.roundRect(x, y, width, height, 6);
+		context.fill();
+		context.stroke();
+		
+		// Corner accents
+		context.fillStyle = '#00ffff';
+		context.fillRect(x, y, 15, 2);
+		context.fillRect(x, y, 2, 15);
+		context.fillRect(x + width - 15, y, 15, 2);
+		context.fillRect(x + width - 2, y, 2, 15);
+		
+		// Health bar
+		context.font = '12px Orbitron';
+		context.fillStyle = '#888888';
+		context.textAlign = 'left';
+		context.fillText('HULL', x + 10, y + 22);
+		
+		UIRenderer.renderProgressBar(
+			x + 50, y + 12, 155, 16,
+			this.player.health, this.player.maxHealth,
+			this.player.health > 30 ? '#00ff88' : '#ff4444'
+		);
+		
+		// Stats row
+		context.font = '14px Orbitron';
+		
+		// Coins
+		context.fillStyle = '#ffff00';
+		context.shadowColor = '#ffff00';
+		context.shadowBlur = 5;
+		context.fillText(`💰 ${stats.coins}`, x + 10, y + 52);
+		context.shadowBlur = 0;
+		
+		// Kills
+		context.fillStyle = '#ff00ff';
+		context.fillText(`☠ ${stats.kills}`, x + 100, y + 52);
+		
+		// Damage bonus
+		const dmgBonus = stats.damageUpgrades * DAMAGE_UPGRADE_BONUS * 100;
+		if (dmgBonus > 0) {
+			context.fillStyle = '#ff4444';
+			context.font = '11px Roboto';
+			context.fillText(`+${dmgBonus.toFixed(0)}% DMG`, x + 160, y + 52);
+		}
+		
+		// Controls hint
+		context.font = '10px Roboto';
+		context.fillStyle = '#555555';
+		context.fillText('P: Pause', x + 10, y + 78);
+	}
+
+	renderWaveIndicator() {
+		const x = CANVAS_WIDTH - 180;
+		const y = 15;
+		
+		// Panel
+		context.fillStyle = 'rgba(10, 20, 40, 0.85)';
+		context.strokeStyle = this.enemies.some(e => e.isBoss) ? '#ff4444' : '#00ffff';
+		context.lineWidth = 2;
+		context.beginPath();
+		context.roundRect(x, y, 165, 60, 6);
+		context.fill();
+		context.stroke();
+		
+		// Wave number
+		context.font = 'bold 24px Orbitron';
+		context.textAlign = 'center';
+		context.fillStyle = '#00ffff';
+		context.shadowColor = '#00ffff';
+		context.shadowBlur = 10;
+		context.fillText(`WAVE ${this.currentWave}`, x + 82, y + 28);
+		context.shadowBlur = 0;
+		
+		// Enemy count
+		context.font = '14px Orbitron';
+		context.fillStyle = this.enemies.length > 5 ? '#ff4444' : '#00ff88';
+		context.fillText(`◈ ${this.enemies.length} HOSTILES`, x + 82, y + 50);
+	}
+
+	renderWeaponBar() {
+		const barWidth = 400;
+		const barHeight = 50;
+		const x = CANVAS_WIDTH / 2 - barWidth / 2;
+		const y = CANVAS_HEIGHT - barHeight - 10;
+		
+		// Background
+		context.fillStyle = 'rgba(10, 20, 40, 0.85)';
+		context.strokeStyle = '#00ffff';
+		context.lineWidth = 1;
+		context.beginPath();
+		context.roundRect(x, y, barWidth, barHeight, 6);
+		context.fill();
+		context.stroke();
+		
+		// Weapon slots
+		const slotWidth = barWidth / 3;
+		this.player.weapons.forEach((weapon, index) => {
+			const slotX = x + index * slotWidth;
+			const isActive = index === this.player.currentWeaponIndex;
+			
+			// Slot background
+			if (isActive) {
+				context.fillStyle = 'rgba(0, 255, 255, 0.2)';
+				context.fillRect(slotX + 2, y + 2, slotWidth - 4, barHeight - 4);
+				
+				// Active indicator
+				context.fillStyle = '#00ffff';
+				context.fillRect(slotX + 2, y + barHeight - 4, slotWidth - 4, 2);
+			}
+			
+			// Key number
+			context.font = 'bold 12px Orbitron';
+			context.textAlign = 'center';
+			context.fillStyle = isActive ? '#00ffff' : '#555555';
+			context.fillText(`[${index + 1}]`, slotX + slotWidth / 2, y + 15);
+			
+			// Weapon name
+			context.font = isActive ? 'bold 11px Orbitron' : '11px Roboto';
+			context.fillStyle = isActive ? '#ffffff' : '#888888';
+			context.fillText(weapon.name.toUpperCase(), slotX + slotWidth / 2, y + 30);
+			
+			// Damage
+			const baseDamage = weapon.damage;
+			const actualDamage = Math.floor(baseDamage * (1 + stats.damageUpgrades * DAMAGE_UPGRADE_BONUS));
+			context.font = '10px Roboto';
+			context.fillStyle = isActive ? '#ff4444' : '#666666';
+			context.fillText(`${actualDamage} DMG`, slotX + slotWidth / 2, y + 43);
+		});
 	}
 }

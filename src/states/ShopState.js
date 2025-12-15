@@ -2,21 +2,26 @@ import State from "../../lib/State.js";
 import GameStateName from "../enums/GameStateName.js";
 import { CANVAS_HEIGHT, CANVAS_WIDTH, context, stateMachine, input, stats, spendCoins, HEALTH_UPGRADE_BONUS, DAMAGE_UPGRADE_BONUS } from "../globals.js";
 import Input from "../../lib/Input.js";
+import UIRenderer from "../services/UIRenderer.js";
 
 export default class ShopState extends State {
 	constructor() {
 		super();
 		this.healthUpgradeCost = 40; 
-		this.damageUpgradeCost = 30; 
+		this.damageUpgradeCost = 30;
+		this.time = 0;
 	}
 
 	enter(params) {
 		this.nextWave = params.nextWave;
 		this.player = params.player;
+		this.time = 0;
 		console.log(`Shop opened! Next wave: ${this.nextWave}`);
 	}
 
 	update(dt) {
+		this.time += dt * 1000;
+		
 		// Press Space to continue to next wave
 		if (input.isKeyPressed(Input.KEYS.SPACE)) {
 			stateMachine.change(GameStateName.Play, {
@@ -48,63 +53,135 @@ export default class ShopState extends State {
 		context.save();
 		
 		// Background
-		context.fillStyle = '#0a0a1a';
-		context.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+		UIRenderer.renderSpaceBackground(this.time);
 		
-		// Title
-		context.fillStyle = '#00ffff';
-		context.font = '40px Orbitron';
-		context.textAlign = 'center';
-		context.fillText('SHOP', CANVAS_WIDTH / 2, 100);
+		// Header panel
+		UIRenderer.renderPanel(CANVAS_WIDTH / 2 - 250, 30, 500, 100, '◆ SUPPLY DEPOT ◆');
 		
 		// Wave info
-		context.fillStyle = '#ffffff';
-		context.font = '24px Roboto';
-		context.fillText(`Prepare for Wave ${this.nextWave}`, CANVAS_WIDTH / 2, 150);
+		UIRenderer.renderSubtitle(`WAVE ${this.nextWave} INCOMING`, CANVAS_WIDTH / 2, 80, '#ff4444', 24);
 		
-		// Coins
+		// Coins display
+		context.save();
+		context.font = 'bold 28px Orbitron';
+		context.textAlign = 'center';
 		context.fillStyle = '#ffff00';
-		context.fillText(`Coins: ${stats.coins}`, CANVAS_WIDTH / 2, 200);
+		context.shadowColor = '#ffff00';
+		context.shadowBlur = 15;
+		context.fillText(`💰 ${stats.coins}`, CANVAS_WIDTH / 2, 115);
+		context.restore();
 		
-		// Upgrades
-		const x = 300;
+		// Upgrade panels
+		const panelWidth = 350;
+		const panelHeight = 180;
+		const leftX = CANVAS_WIDTH / 2 - panelWidth - 20;
+		const rightX = CANVAS_WIDTH / 2 + 20;
+		const panelY = 160;
+		
+		// Health Upgrade Panel
 		const canAffordHealth = stats.coins >= this.healthUpgradeCost;
+		this.renderUpgradePanel(
+			leftX, panelY, panelWidth, panelHeight,
+			'HULL REINFORCEMENT',
+			'H',
+			this.healthUpgradeCost,
+			canAffordHealth,
+			'#00ff88',
+			[
+				`Current HP: ${this.player.maxHealth}`,
+				`After: ${this.player.maxHealth + HEALTH_UPGRADE_BONUS}`,
+				`+ Full Repair`
+			],
+			`+${HEALTH_UPGRADE_BONUS} MAX HP`
+		);
+		
+		// Damage Upgrade Panel
 		const canAffordDamage = stats.coins >= this.damageUpgradeCost;
-		
-		// Health Upgrade
-		context.font = '20px Roboto';
-		context.textAlign = 'left';
-		context.fillStyle = canAffordHealth ? '#ffffff' : '#555555';
-		context.fillText(`[H] Health Upgrade - ${this.healthUpgradeCost} coins`, x, 260);
-		
-		context.fillStyle = '#888888';
-		context.font = '16px Roboto';
-		context.fillText(`  Current HP: ${this.player.maxHealth} → After: ${this.player.maxHealth + HEALTH_UPGRADE_BONUS} (+${HEALTH_UPGRADE_BONUS} & Full Heal)`, x, 280);
-		
-		// Damage Upgrade
-		context.fillStyle = canAffordDamage ? '#ffffff' : '#555555';
-		context.font = '20px Roboto';
-		context.fillText(`[D] Damage Upgrade - ${this.damageUpgradeCost} coins`, x, 330);
-		
-		context.fillStyle = '#888888';
-		context.font = '16px Roboto';
 		const currentBonus = stats.damageUpgrades * DAMAGE_UPGRADE_BONUS * 100;
 		const newBonus = (stats.damageUpgrades + 1) * DAMAGE_UPGRADE_BONUS * 100;
-		context.fillText(`  Current Bonus: +${currentBonus}% → After: +${newBonus}% (+${DAMAGE_UPGRADE_BONUS * 100}% to all weapons)`, x, 350);
+		this.renderUpgradePanel(
+			rightX, panelY, panelWidth, panelHeight,
+			'WEAPON OVERDRIVE',
+			'D',
+			this.damageUpgradeCost,
+			canAffordDamage,
+			'#ff4444',
+			[
+				`Current Bonus: +${currentBonus.toFixed(0)}%`,
+				`After: +${newBonus.toFixed(0)}%`,
+				`All weapons`
+			],
+			`+${(DAMAGE_UPGRADE_BONUS * 100).toFixed(0)}% DMG`
+		);
 		
-		// Example damage preview
-		context.fillStyle = '#666666';
-		context.font = '14px Roboto';
-		const exampleDamage = 50; // Sniper base damage
-		const currentDamage = Math.floor(exampleDamage * (1 + stats.damageUpgrades * DAMAGE_UPGRADE_BONUS));
-		const afterDamage = Math.floor(exampleDamage * (1 + (stats.damageUpgrades + 1) * DAMAGE_UPGRADE_BONUS));
-		context.fillText(`  (Ex: Sniper 50 base → ${currentDamage} now → ${afterDamage} after upgrade)`, x, 370);
+		// Player status panel
+		UIRenderer.renderPanel(CANVAS_WIDTH / 2 - 200, 370, 400, 100, '◆ SHIP STATUS ◆');
 		
-		// Continue
-		context.fillStyle = '#00ff00';
-		context.font = '24px Roboto';
+		// Health bar
+		UIRenderer.renderText('HULL', CANVAS_WIDTH / 2 - 150, 410, '#888888', 14, 'left');
+		UIRenderer.renderProgressBar(
+			CANVAS_WIDTH / 2 - 100, 400, 250, 20,
+			this.player.health, this.player.maxHealth,
+			this.player.health > 30 ? '#00ff88' : '#ff4444'
+		);
+		
+		// Stats
+		UIRenderer.renderText(`DMG Bonus: +${currentBonus.toFixed(0)}%`, CANVAS_WIDTH / 2 - 80, 450, '#ff4444', 14, 'left');
+		UIRenderer.renderText(`Upgrades: ${stats.healthUpgrades + stats.damageUpgrades}`, CANVAS_WIDTH / 2 + 80, 450, '#00ffff', 14, 'left');
+		
+		// Continue prompt
+		UIRenderer.renderPrompt('◆ PRESS SPACE TO LAUNCH ◆', CANVAS_WIDTH / 2, CANVAS_HEIGHT - 60, this.time);
+		
+		context.restore();
+	}
+
+	renderUpgradePanel(x, y, width, height, title, key, cost, canAfford, color, details, bonus) {
+		context.save();
+		
+		// Panel background
+		const bgColor = canAfford ? 'rgba(0, 255, 255, 0.1)' : 'rgba(50, 50, 50, 0.5)';
+		context.fillStyle = bgColor;
+		context.strokeStyle = canAfford ? color : '#444444';
+		context.lineWidth = canAfford ? 2 : 1;
+		
+		if (canAfford) {
+			context.shadowColor = color;
+			context.shadowBlur = 15;
+		}
+		
+		context.beginPath();
+		context.roundRect(x, y, width, height, 8);
+		context.fill();
+		context.stroke();
+		context.shadowBlur = 0;
+		
+		// Title
+		context.font = 'bold 16px Orbitron';
 		context.textAlign = 'center';
-		context.fillText('Press SPACE to continue', CANVAS_WIDTH / 2, CANVAS_HEIGHT - 100);
+		context.fillStyle = canAfford ? color : '#666666';
+		context.fillText(title, x + width / 2, y + 25);
+		
+		// Key hint
+		context.font = 'bold 24px Orbitron';
+		context.fillStyle = canAfford ? '#ffffff' : '#444444';
+		context.fillText(`[${key}]`, x + width / 2, y + 55);
+		
+		// Cost
+		context.font = '18px Orbitron';
+		context.fillStyle = canAfford ? '#ffff00' : '#ff4444';
+		context.fillText(`💰 ${cost}`, x + width / 2, y + 85);
+		
+		// Details
+		context.font = '12px Roboto';
+		context.fillStyle = '#888888';
+		details.forEach((detail, i) => {
+			context.fillText(detail, x + width / 2, y + 110 + i * 16);
+		});
+		
+		// Bonus tag
+		context.font = 'bold 14px Orbitron';
+		context.fillStyle = canAfford ? color : '#555555';
+		context.fillText(bonus, x + width / 2, y + height - 15);
 		
 		context.restore();
 	}

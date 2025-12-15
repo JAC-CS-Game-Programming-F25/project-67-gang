@@ -2,14 +2,17 @@ import State from "../../lib/State.js";
 import GameStateName from "../enums/GameStateName.js";
 import Input from "../../lib/Input.js";
 import { CANVAS_HEIGHT, CANVAS_WIDTH, context, stateMachine, input, getHighScore, sounds, hasSaveGame, loadGameState } from "../globals.js";
+import UIRenderer from "../services/UIRenderer.js";
 
 export default class TitleScreenState extends State {
 	constructor() {
 		super();
+		this.time = 0;
 	}
 
 	enter() {
 		this.highScore = getHighScore();
+		this.time = 0;
 		
 		// Stop music if playing
 		if (sounds.get('music')) {
@@ -18,8 +21,10 @@ export default class TitleScreenState extends State {
 	}
 
 	update(dt) {
+		this.time += dt * 1000;
+		
 		// Check for save game every frame
-		this.hasSave = hasSaveGame(); // FIXED: was this.hasSaveGame
+		this.hasSave = hasSaveGame();
 		
 		// Check for Enter key to start NEW game
 		if (input.isKeyPressed(Input.KEYS.ENTER)) {
@@ -36,41 +41,47 @@ export default class TitleScreenState extends State {
 	render() {
 		context.save();
 		
-		// Background
-		context.fillStyle = '#0a0a1a';
-		context.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+		// Animated space background
+		UIRenderer.renderSpaceBackground(this.time);
 		
-		// Title
-		context.fillStyle = '#00ffff';
-		context.font = '60px Orbitron';
-		context.textAlign = 'center';
-		context.fillText('NEON ONSLAUGHT', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 100);
+		// Title with glow animation
+		const titleGlow = Math.sin(this.time * 0.003) * 10 + 20;
+		context.shadowBlur = titleGlow;
+		UIRenderer.renderTitle('NEON', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 150, '#00ffff', 80);
+		UIRenderer.renderTitle('ONSLAUGHT', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 70, '#ff00ff', 60);
 		
-		// Instructions
-		context.fillStyle = '#ffffff';
-		context.font = '24px Roboto';
-		context.fillText('Press ENTER to Start New Game', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2);
+		// Tagline
+		UIRenderer.renderSubtitle('Survive the cosmic invasion', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 - 10, '#888888', 18);
 		
-		// Resume option (if save exists)
+		// Menu options
+		const menuY = CANVAS_HEIGHT / 2 + 60;
+		UIRenderer.renderButton('▶  NEW GAME  [ENTER]', CANVAS_WIDTH / 2, menuY, true);
+		
 		if (this.hasSave) {
-			context.fillStyle = '#00ff00';
-			context.font = '24px Roboto';
-			context.fillText('Press R to Resume Game', CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 40);
+			UIRenderer.renderButton('↻  CONTINUE  [R]', CANVAS_WIDTH / 2, menuY + 55, false, '#00ff88');
 		}
 		
-		// High score
+		// High score panel
 		if (this.highScore && this.highScore.wave > 0) {
-			context.fillStyle = '#00ffff';
-			context.font = '20px Roboto';
-			context.fillText(`High Score: Wave ${this.highScore.wave} | ${this.highScore.kills} Kills`, CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2 + 100);
+			UIRenderer.renderPanel(CANVAS_WIDTH / 2 - 150, CANVAS_HEIGHT - 180, 300, 70, '◆ HIGH SCORE ◆');
+			UIRenderer.renderText(
+				`Wave ${this.highScore.wave}  ●  ${this.highScore.kills} Kills`,
+				CANVAS_WIDTH / 2,
+				CANVAS_HEIGHT - 130,
+				'#00ffff',
+				20
+			);
 		}
 		
-		// Controls
-		context.font = '16px Roboto';
-		context.fillStyle = '#888888';
-		context.fillText('WASD: Move | Mouse: Aim | Click: Shoot | 1/2/3: Weapons' , CANVAS_WIDTH / 2, CANVAS_HEIGHT - 130);
-		context.fillText('P: Pause | ESC: Quit to Menu (when paused)', CANVAS_WIDTH / 2, CANVAS_HEIGHT - 100);
-
+		// Controls hint
+		const controlsY = CANVAS_HEIGHT - 50;
+		context.save();
+		context.font = '12px Roboto';
+		context.textAlign = 'center';
+		context.fillStyle = '#555555';
+		context.fillText('WASD: Move  ●  Mouse: Aim  ●  Click: Shoot  ●  1/2/3: Weapons  ●  P: Pause', CANVAS_WIDTH / 2, controlsY);
+		context.restore();
+		
 		context.restore();
 	}
 }
